@@ -18,161 +18,174 @@ import java.util.List;
 @Service
 public class ItemService {
 
-    @Autowired
-    private ItemRepository itemRepository;
+	@Autowired
+	private ItemRepository itemRepository;
 
-    @Autowired
-    private UsuarioDTOConvert usuarioDTOConvert;
+	@Autowired
+	private UsuarioDTOConvert usuarioDTOConvert;
 
 //    @Autowired
 //    private PedidoService pedidoService;
 
-    public ItemDTO criar(ItemDTO itemDTO){
-        Item item = toItem(itemDTO);
+	public ItemDTO criar(ItemDTO itemDTO) {
 
-        itemRepository.save(item);
+		System.out.print(itemDTO.getTamanho());
 
-        return toItemDTO(item);
-    }
+		if (itemDTO.getSabores() != null) {
+			System.out.print(itemDTO.getSabores().size());
 
-    public ItemDTO findById(Long id){
-        Item itemBanco = itemRepository.findById(id).orElse(null);
+			if (itemDTO.getTamanho().equals("Pequena") && itemDTO.getSabores().size() > 1) {
+				throw new RuntimeException("O Tamanho 'Pequeno', so pode ter 1 sabor");
+			} else if (itemDTO.getTamanho().equals("Media") && itemDTO.getSabores().size() > 2) {
+				throw new RuntimeException("O Tamanho 'Media', so pode ter 2 sabor");
+			} else if (itemDTO.getTamanho().equals("Grande") && itemDTO.getSabores().size() > 3) {
+				throw new RuntimeException("O Tamanho 'Grande', so pode ter 3 sabor");
+			}
+		}
 
-        return toItemDTO(itemBanco);
-    }
+		Item item = toItem(itemDTO);
 
-    public List<ItemDTO> findAllItens(){
-        List<Item> itensBanco = itemRepository.findAll();
-        List<ItemDTO> itensDTOList = new ArrayList<>();
+		itemRepository.save(item);
 
-        for(int i = 0; i < itensBanco.size(); i++){
-            itensDTOList.add(toItemDTO(itensBanco.get(i)));
-        }
-        return itensDTOList;
-    }
+		return toItemDTO(item);
+	}
 
-    public ItemDTO editar(Long id, ItemDTO itemDTO){
-        Item item = this.itemRepository.findById(id).orElse(null);
+	public ItemDTO findById(Long id) {
+		Item itemBanco = itemRepository.findById(id).orElse(null);
 
-        Assert.isTrue(item != null, "Item nao encontrado");
+		return toItemDTO(itemBanco);
+	}
 
-        this.itemRepository.save(toItem(itemDTO));
+	public List<ItemDTO> findAllItens() {
+		List<Item> itensBanco = itemRepository.findAll();
+		List<ItemDTO> itensDTOList = new ArrayList<>();
 
-        return itemDTO;
-    }
+		for (int i = 0; i < itensBanco.size(); i++) {
+			itensDTOList.add(toItemDTO(itensBanco.get(i)));
+		}
+		return itensDTOList;
+	}
 
-    public String deletar(Long id){
-        Item item = this.itemRepository.findById(id).orElse(null);
+	public ItemDTO editar(Long id, ItemDTO itemDTO) {
+		Item item = this.itemRepository.findById(id).orElse(null);
 
-        Assert.isTrue(item != null, "Item nao encontrado");
+		Assert.isTrue(item != null, "Item nao encontrado");
 
-        this.itemRepository.delete(item);
+		this.itemRepository.save(toItem(itemDTO));
 
-        return "Item deletado";
-    }
+		return itemDTO;
+	}
 
-    public ItemDTO toItemDTO(Item item){
-        ItemDTO itemDTO = new ItemDTO();
+	public String deletar(Long id) {
+		Item item = this.itemRepository.findById(id).orElse(null);
 
-        itemDTO.setId(item.getId());
-        itemDTO.setNome(item.getNome());
-        itemDTO.setTamanho(item.getTamanho());
-        itemDTO.setPossuiSabores(item.isPossuiSabores());
-        itemDTO.setValor(item.getValor());
-        //itemDTO.setPedidoDTO(pedidoService.toPedidoDTO(item.getPedido()));
+		Assert.isTrue(item != null, "Item nao encontrado");
 
-        List<SaboresDTO> saboresList = new ArrayList<>();
+		this.itemRepository.delete(item);
 
-        if(item.getSabores() != null){
-            for(int i = 0; i< item.getSabores().size(); i++){
-                saboresList.add(toSaboresDTO(item.getSabores().get(i)));
-            }
-        }
+		return "Item deletado";
+	}
 
-        itemDTO.setSabores(saboresList);
-        return itemDTO;
-    }
+	public ItemDTO toItemDTO(Item item) {
+		ItemDTO itemDTO = new ItemDTO();
 
-    public Item toItem(ItemDTO itemDTO){
-        Item item = new Item();
+		itemDTO.setId(item.getId());
+		itemDTO.setNome(item.getNome());
+		itemDTO.setTamanho(item.getTamanho());
+		itemDTO.setPossuiSabores(item.isPossuiSabores());
+		itemDTO.setValor(item.getValor());
+		// itemDTO.setPedidoDTO(pedidoService.toPedidoDTO(item.getPedido()));
 
-        item.setId(itemDTO.getId());
-        item.setNome(itemDTO.getNome());
-        item.setTamanho(itemDTO.getTamanho());
-        item.setPossuiSabores(itemDTO.isPossuiSabores());
-        //item.setPedido(pedidoService.toPedido(itemDTO.getPedidoDTO()));
-        item.setValor(itemDTO.getValor());
+		List<SaboresDTO> saboresList = new ArrayList<>();
 
-        List<Sabores> saboresList = new ArrayList<>();
+		if (item.getSabores() != null) {
+			for (int i = 0; i < item.getSabores().size(); i++) {
+				saboresList.add(toSaboresDTO(item.getSabores().get(i)));
+			}
+		}
 
-        if(itemDTO.getSabores() != null){
-            for(int i = 0; i< itemDTO.getSabores().size(); i++){
-                saboresList.add(toSabores(itemDTO.getSabores().get(i)));
-            }
-        }
+		itemDTO.setSabores(saboresList);
+		return itemDTO;
+	}
 
-        item.setSabores(saboresList);
-        return item;    }
+	public Item toItem(ItemDTO itemDTO) {
+		Item item = new Item();
 
+		item.setId(itemDTO.getId());
+		item.setNome(itemDTO.getNome());
+		item.setTamanho(itemDTO.getTamanho());
+		item.setPossuiSabores(itemDTO.isPossuiSabores());
+		// item.setPedido(pedidoService.toPedido(itemDTO.getPedidoDTO()));
+		item.setValor(itemDTO.getValor());
 
-    //FUNCOES DE TOPEDIDO E TOPEDIDODTO
-    public Pedido toPedido(PedidoDTO pedidoDTO){
-        Pedido pedido = new Pedido();
+		List<Sabores> saboresList = new ArrayList<>();
 
-        pedido.setId(pedidoDTO.getId());
-        pedido.setNome(pedidoDTO.getNome());
-        pedido.setObservacao(pedidoDTO.getObservacao());
-        pedido.setUsuario(usuarioDTOConvert.convertUsuarioDTOToUsuario(pedidoDTO.getUsuario()));
+		if (itemDTO.getSabores() != null) {
+			for (int i = 0; i < itemDTO.getSabores().size(); i++) {
+				saboresList.add(toSabores(itemDTO.getSabores().get(i)));
+			}
+		}
 
+		item.setSabores(saboresList);
+		return item;
+	}
 
+	// FUNCOES DE TOPEDIDO E TOPEDIDODTO
+	public Pedido toPedido(PedidoDTO pedidoDTO) {
+		Pedido pedido = new Pedido();
 
-        List<Item>  itemList = new ArrayList<>();
+		pedido.setId(pedidoDTO.getId());
+		pedido.setNome(pedidoDTO.getNome());
+		pedido.setObservacao(pedidoDTO.getObservacao());
+		pedido.setUsuario(usuarioDTOConvert.convertUsuarioDTOToUsuario(pedidoDTO.getUsuario()));
 
-        if(pedidoDTO.getItem() != null){
-            for(int i = 0; i < pedidoDTO.getItem().size(); i++){
-                itemList.add(toItem(pedidoDTO.getItem().get(i)));
-            }
-        }
+		List<Item> itemList = new ArrayList<>();
 
-        pedido.setItem(itemList);
-        return pedido;
-    }
+		if (pedidoDTO.getItem() != null) {
+			for (int i = 0; i < pedidoDTO.getItem().size(); i++) {
+				itemList.add(toItem(pedidoDTO.getItem().get(i)));
+			}
+		}
 
-    public PedidoDTO toPedidoDTO(Pedido pedido){
-        PedidoDTO pedidoDTO = new PedidoDTO();
+		pedido.setItem(itemList);
+		return pedido;
+	}
 
-        pedidoDTO.setId(pedido.getId());
-        pedidoDTO.setNome(pedido.getNome());
-        pedidoDTO.setObservacao(pedido.getObservacao());
-        pedidoDTO.setUsuario(usuarioDTOConvert.convertUsuarioToUsuarioDTO(pedido.getUsuario()));
+	public PedidoDTO toPedidoDTO(Pedido pedido) {
+		PedidoDTO pedidoDTO = new PedidoDTO();
 
-        List<ItemDTO> itemsdump = new ArrayList<>();
+		pedidoDTO.setId(pedido.getId());
+		pedidoDTO.setNome(pedido.getNome());
+		pedidoDTO.setObservacao(pedido.getObservacao());
+		pedidoDTO.setUsuario(usuarioDTOConvert.convertUsuarioToUsuarioDTO(pedido.getUsuario()));
 
-        if(pedido.getItem() != null){
-            for(int i = 0; i < pedido.getItem().size(); i++){
-                itemsdump.add(toItemDTO(pedido.getItem().get(i)));
-            }
-        }
+		List<ItemDTO> itemsdump = new ArrayList<>();
 
-        pedidoDTO.setItem(itemsdump);
-        return pedidoDTO;
-    }
+		if (pedido.getItem() != null) {
+			for (int i = 0; i < pedido.getItem().size(); i++) {
+				itemsdump.add(toItemDTO(pedido.getItem().get(i)));
+			}
+		}
 
-    public SaboresDTO toSaboresDTO(Sabores sabores){
-        SaboresDTO saboresDTO = new SaboresDTO();
+		pedidoDTO.setItem(itemsdump);
+		return pedidoDTO;
+	}
 
-        saboresDTO.setNome(sabores.getNome());
-        saboresDTO.setId(sabores.getId());
+	public SaboresDTO toSaboresDTO(Sabores sabores) {
+		SaboresDTO saboresDTO = new SaboresDTO();
 
-        return saboresDTO;
-    }
+		saboresDTO.setNome(sabores.getNome());
+		saboresDTO.setId(sabores.getId());
 
-    public Sabores toSabores(SaboresDTO saboresDTO){
-        Sabores sabores = new Sabores();
+		return saboresDTO;
+	}
 
-        sabores.setNome(saboresDTO.getNome());
-        sabores.setId(saboresDTO.getId());
+	public Sabores toSabores(SaboresDTO saboresDTO) {
+		Sabores sabores = new Sabores();
 
-        return sabores;
-    }
+		sabores.setNome(saboresDTO.getNome());
+		sabores.setId(saboresDTO.getId());
+
+		return sabores;
+	}
 }

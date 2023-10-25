@@ -23,6 +23,8 @@ public class Pedido {
 
     @Column(name = "entrega")
     private Boolean entrega;
+    
+    private String status;
 
     @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(name = "item_pedidos",
@@ -30,7 +32,6 @@ public class Pedido {
       inverseJoinColumns = @JoinColumn(name = "item_fk"))
     private List<Item> item;
     
-    private Float valorTotal;
     
     @ManyToOne
     @JoinColumn(name = "usuario_fk")

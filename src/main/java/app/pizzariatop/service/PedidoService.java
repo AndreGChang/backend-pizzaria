@@ -16,134 +16,146 @@ import java.util.List;
 @Service
 public class PedidoService {
 
-    @Autowired
-    private PedidoRepository pedidoRepository;
+	@Autowired
+	private PedidoRepository pedidoRepository;
 
-    @Autowired
-    private UsuarioDTOConvert usuarioDTOConvert;
+	@Autowired
+	private UsuarioDTOConvert usuarioDTOConvert;
 
-    @Autowired
-    private ItemService itemService;
+	@Autowired
+	private ItemService itemService;
 
+	public PedidoDTO criar(PedidoDTO pedidoDTO) {
 
-    public PedidoDTO criar(PedidoDTO pedidoDTO){
-    	
-    	Float valorTotal = 0f;
-    	
-    	for(int i = 0 ; i < pedidoDTO.getItem().size(); i++) {
-    		valorTotal = valorTotal + pedidoDTO.getItem().get(i).getValor();
-    	}
-    	
-       Pedido pedido = toPedido(pedidoDTO);
+		Pedido pedido = toPedido(pedidoDTO);
 
+		if (pedido.getItem() == null) {
+			System.out.println("lista nula");
+		} else {
+			System.out.println(pedido.getItem().size());
+		}
 
-        if(pedido.getItem() == null){
-           System.out.println("lista nula");
-       }else{
-           System.out.println(pedido.getItem().size());
-       }
-        
-        pedido.setValorTotal(valorTotal);
-        
-       pedidoRepository.save(pedido);
+		pedido.setStatus("PREPARO");
 
-       return toPedidoDTO(pedido);
-    }
+		pedidoRepository.save(pedido);
 
-    public PedidoDTO findById(Long id){
-        Pedido pedidoBanco = pedidoRepository.findById(id).orElse(null);
+		return toPedidoDTO(pedido);
+	}
 
-        return toPedidoDTO(pedidoBanco);
-    }
+	public PedidoDTO findById(Long id) {
+		Pedido pedidoBanco = pedidoRepository.findById(id).orElse(null);
 
-    public List<PedidoDTO> findAllPedido(){
-        List<Pedido> pedidosBanco = pedidoRepository.findAll();
-        List<PedidoDTO> pedidoDTOList = new ArrayList<>();
+		PedidoDTO aux = toPedidoDTO(pedidoBanco);
 
-        for(int i = 0; i < pedidosBanco.size(); i++){
-            pedidoDTOList.add(toPedidoDTO(pedidosBanco.get(i)));
-        }
+		double valorTotal = 0;
+		if (aux.getItem() != null)
+			for (int j = 0; j < aux.getItem().size(); j++) {
+				valorTotal += aux.getItem().get(j).getValor();
+			}
 
-        return pedidoDTOList;
-    }
+		aux.setValorTotal(valorTotal);
 
-    public PedidoDTO editar(Long id, PedidoDTO pedidoDTO){
-        Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
+		return aux;
+	}
 
-        Assert.isTrue(pedido != null, "Pedido nao encontrado");
-        
-        Float valorTotal = 0f;
-    	
-    	for(int i = 0 ; i < pedidoDTO.getItem().size(); i++) {
-    		valorTotal = valorTotal + pedidoDTO.getItem().get(i).getValor();
-    	}
-    	
-    	 pedido.setValorTotal(valorTotal);
-    	
-        this.pedidoRepository.save(toPedido(pedidoDTO));
+	public List<PedidoDTO> findAllPedido() {
+		List<Pedido> pedidosBanco = pedidoRepository.findAll();
+		List<PedidoDTO> pedidoDTOList = new ArrayList<>();
 
-        return pedidoDTO;
-    }
+		for (int i = 0; i < pedidosBanco.size(); i++) {
+			pedidoDTOList.add(toPedidoDTO(pedidosBanco.get(i)));
 
-    public String deletar(Long id){
-        Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
+			double valorTotal = 0;
+			if (pedidosBanco.get(i).getItem() != null)
+				for (int j = 0; j < pedidosBanco.get(i).getItem().size(); j++) {
+					valorTotal += pedidosBanco.get(i).getItem().get(j).getValor();
+				}
 
-        Assert.isTrue(pedido != null, "Pedido nao encontrado");
+			pedidoDTOList.get(i).setValorTotal(valorTotal);
 
-        this.pedidoRepository.delete(pedido);
+		}
 
-        return "Pedido deletado";
-    }
-    
+		return pedidoDTOList;
+	}
 
-    public PedidoDTO toPedidoDTO(Pedido pedido){
-        PedidoDTO pedidoDTO = new PedidoDTO();
+	public PedidoDTO editar(Long id, PedidoDTO pedidoDTO) {
+		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
 
-        pedidoDTO.setId(pedido.getId());
-        pedidoDTO.setNome(pedido.getNome());
-        pedidoDTO.setObservacao(pedido.getObservacao());
-        pedidoDTO.setValorTotal(pedido.getValorTotal());
+		Assert.isTrue(pedido != null, "Pedido nao encontrado");
 
-        if(pedido.getUsuario() != null){
+		Assert.isTrue(pedidoDTO.getNome() != null, "Sem nome");
 
-            pedidoDTO.setUsuario(usuarioDTOConvert.convertUsuarioToUsuarioDTO(pedido.getUsuario()));
-        }
+		this.pedidoRepository.save(toPedido(pedidoDTO));
 
-        List<ItemDTO> itemsdump = new ArrayList<>();
+		return pedidoDTO;
+	}
 
-        if(pedido.getItem() != null){
-            for(int i = 0; i < pedido.getItem().size(); i++){
-                itemsdump.add(itemService.toItemDTO(pedido.getItem().get(i)));
-            }
-        }
+	public String deletar(Long id) {
+		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
 
-        pedidoDTO.setItem(itemsdump);
-        return pedidoDTO;
-    }
+		Assert.isTrue(pedido != null, "Pedido nao encontrado");
 
-    public Pedido toPedido(PedidoDTO pedidoDTO){
-        Pedido pedido = new Pedido();
+		this.pedidoRepository.delete(pedido);
 
-        pedido.setId(pedidoDTO.getId());
-        pedido.setNome(pedidoDTO.getNome());
-        pedido.setObservacao(pedidoDTO.getObservacao());
-        pedido.setValorTotal(pedidoDTO.getValorTotal());
-        
-        
-        if(pedidoDTO.getUsuario() != null){
+		return "Pedido deletado";
+	}
 
-            pedido.setUsuario(usuarioDTOConvert.convertUsuarioDTOToUsuario(pedidoDTO.getUsuario()));
-        }
+	public PedidoDTO finalizar(Long id) {
+		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
+		
+		Assert.isTrue(pedido != null, "Pedido nao encontrado");
 
-        List<Item>  itemList = new ArrayList<>();
+		
+	}
 
-        if(pedidoDTO.getItem() != null){
-            for(int i = 0; i < pedidoDTO.getItem().size(); i++){
-                itemList.add(itemService.toItem(pedidoDTO.getItem().get(i)));
-            }
-        }
+	public PedidoDTO toPedidoDTO(Pedido pedido) {
+		PedidoDTO pedidoDTO = new PedidoDTO();
 
-        pedido.setItem(itemList);
-        return pedido;
-    }
+		pedidoDTO.setId(pedido.getId());
+		pedidoDTO.setNome(pedido.getNome());
+		pedidoDTO.setObservacao(pedido.getObservacao());
+		pedidoDTO.setEntrega(pedido.getEntrega());
+
+		if (pedido.getUsuario() != null) {
+
+			pedidoDTO.setUsuario(usuarioDTOConvert.convertUsuarioToUsuarioDTO(pedido.getUsuario()));
+		}
+
+		List<ItemDTO> itemsdump = new ArrayList<>();
+
+		if (pedido.getItem() != null) {
+			for (int i = 0; i < pedido.getItem().size(); i++) {
+				itemsdump.add(itemService.toItemDTO(pedido.getItem().get(i)));
+			}
+		}
+
+		pedidoDTO.setItem(itemsdump);
+		return pedidoDTO;
+	}
+
+	public Pedido toPedido(PedidoDTO pedidoDTO) {
+		Pedido pedido = new Pedido();
+
+		pedido.setId(pedidoDTO.getId());
+		pedido.setNome(pedidoDTO.getNome());
+		pedido.setObservacao(pedidoDTO.getObservacao());
+		pedido.setEntrega(pedidoDTO.getEntrega());
+
+		if (pedidoDTO.getUsuario() != null) {
+
+			pedido.setUsuario(usuarioDTOConvert.convertUsuarioDTOToUsuario(pedidoDTO.getUsuario()));
+		}
+
+		List<Item> itemList = new ArrayList<>();
+
+		if (pedidoDTO.getItem() != null) {
+			for (int i = 0; i < pedidoDTO.getItem().size(); i++) {
+				itemList.add(itemService.toItem(pedidoDTO.getItem().get(i)));
+			}
+		}
+
+		pedido.setItem(itemList);
+		return pedido;
+	}
+
 }

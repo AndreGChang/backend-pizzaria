@@ -53,6 +53,7 @@ public class PedidoController {
         try{
             return ResponseEntity.ok(pedidoService.editar(id,pedidoDTO));
         }catch (Exception e){
+            System.out.println(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

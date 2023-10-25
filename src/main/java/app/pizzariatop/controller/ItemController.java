@@ -37,7 +37,7 @@ public class ItemController {
     }
 
     @GetMapping("/buscar/{id}")
-    public  ResponseEntity<ItemDTO> buscarId(@RequestParam("id")Long id){
+    public  ResponseEntity<ItemDTO> buscarId(@PathVariable("id")Long id){
         try{
             return ResponseEntity.ok(itemService.findById(id));
         } catch (Exception e){
@@ -46,7 +46,7 @@ public class ItemController {
     }
 
     @PutMapping("/editar/{id}")
-    public ResponseEntity<ItemDTO> editar(@RequestParam("id")Long id, @RequestBody ItemDTO itemDTO){
+    public ResponseEntity<ItemDTO> editar(@PathVariable("id")Long id, @RequestBody ItemDTO itemDTO){
         try{
             return ResponseEntity.ok(itemService.editar(id,itemDTO));
         }catch (Exception e){
