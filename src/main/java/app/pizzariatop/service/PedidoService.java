@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +37,17 @@ public class PedidoService {
 		}
 
 		pedido.setStatus("PREPARO");
-
+		
+		LocalDateTime d = LocalDateTime.now();
+		
+		pedido.setDataHora(d);
+		
 		pedidoRepository.save(pedido);
-
+		
 		return toPedidoDTO(pedido);
 	}
+	
+  
 
 	public PedidoDTO findById(Long id) {
 		Pedido pedidoBanco = pedidoRepository.findById(id).orElse(null);
@@ -77,6 +84,27 @@ public class PedidoService {
 
 		return pedidoDTOList;
 	}
+	
+	public List<PedidoDTO> findByStatus(){
+		List<Pedido> pedidosBanco = pedidoRepository.searchByStatus();
+		List<PedidoDTO> pedidoDTOList = new ArrayList<>();
+		
+		for(int i = 0; i < pedidosBanco.size(); i++) {
+			
+			pedidoDTOList.add(toPedidoDTO(pedidosBanco.get(i)));
+			double valorTotal = 0;
+			if(pedidosBanco.get(i).getItem() != null) {
+				for (int j = 0; j < pedidosBanco.get(i).getItem().size(); j++) {
+					valorTotal += pedidosBanco.get(i).getItem().get(j).getValor();
+				}
+
+			pedidoDTOList.get(i).setValorTotal(valorTotal);
+			
+			}
+		}
+		
+		return pedidoDTOList;
+	}
 
 	public PedidoDTO editar(Long id, PedidoDTO pedidoDTO) {
 		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
@@ -89,6 +117,18 @@ public class PedidoService {
 
 		return pedidoDTO;
 	}
+	
+	public PedidoDTO finalizar(Long id, PedidoDTO pedidoDTO) {
+		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
+
+		Assert.isTrue(pedido != null, "Pedido nao encontrado");
+		
+		pedido.setStatus("FINALIZADO");
+		
+		PedidoDTO pedidoDTO1 = toPedidoDTO(pedido);
+		
+		return pedidoDTO1;
+	}
 
 	public String deletar(Long id) {
 		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
@@ -99,14 +139,7 @@ public class PedidoService {
 
 		return "Pedido deletado";
 	}
-
-	public PedidoDTO finalizar(Long id) {
-		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
-		
-		Assert.isTrue(pedido != null, "Pedido nao encontrado");
-
-		
-	}
+	
 
 	public PedidoDTO toPedidoDTO(Pedido pedido) {
 		PedidoDTO pedidoDTO = new PedidoDTO();
@@ -115,7 +148,8 @@ public class PedidoService {
 		pedidoDTO.setNome(pedido.getNome());
 		pedidoDTO.setObservacao(pedido.getObservacao());
 		pedidoDTO.setEntrega(pedido.getEntrega());
-
+		pedidoDTO.setDataHora(pedido.getDataHora());
+		
 		if (pedido.getUsuario() != null) {
 
 			pedidoDTO.setUsuario(usuarioDTOConvert.convertUsuarioToUsuarioDTO(pedido.getUsuario()));
@@ -140,6 +174,7 @@ public class PedidoService {
 		pedido.setNome(pedidoDTO.getNome());
 		pedido.setObservacao(pedidoDTO.getObservacao());
 		pedido.setEntrega(pedidoDTO.getEntrega());
+		pedido.setDataHora(pedidoDTO.getDataHora());
 
 		if (pedidoDTO.getUsuario() != null) {
 

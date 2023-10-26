@@ -3,6 +3,7 @@ package app.pizzariatop.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -21,6 +22,8 @@ public class PedidoDTO {
 	private String status;
 
 	private double valorTotal;
+	
+	private LocalDateTime dataHora;
 
 	private List<ItemDTO> item;
 

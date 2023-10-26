@@ -19,17 +19,6 @@ public class Item {
 
     private String tamanho;
 
-    @ManyToMany(mappedBy = "item")
-    private List<Pedido> pedido;
-
-    private boolean possuiSabores;
-
-    @ManyToMany
-    @JoinTable(name = "item_sabores",
-      joinColumns = @JoinColumn(name = "item_fk"),
-      inverseJoinColumns = @JoinColumn(name = "sabores_fk"))
-    private List<Sabores> sabores;
-    
     private Float valor;
     	
     public Item(){
@@ -40,7 +29,6 @@ public class Item {
         this.id = id;
         //this.pedido = pedido;
         this.tamanho = tamanho;
-        this.sabores = sabores;
     }
 
 }

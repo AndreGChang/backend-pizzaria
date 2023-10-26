@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -15,14 +18,13 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nome")
-    private String nome;
-
     @Column(name = "observacao")
     private String observacao;
 
     @Column(name = "entrega")
     private Boolean entrega;
+    
+    private LocalDateTime dataHora;
     
     private String status;
 
@@ -30,9 +32,10 @@ public class Pedido {
     @JoinTable(name = "item_pedidos",
       joinColumns = @JoinColumn(name = "pedido_fk"),
       inverseJoinColumns = @JoinColumn(name = "item_fk"))
-    private List<Item> item;
-    
-    
+    private Set<ItemPedido> itemPedido = new HashSet<>();
+
+    private Boolean pago;
+
     @ManyToOne
     @JoinColumn(name = "usuario_fk")
     private Usuario usuario;
@@ -43,7 +46,6 @@ public class Pedido {
 
     public Pedido(Long id, String nome, String observacao, Usuario usuario) {
         this.id = id;
-        this.nome = nome;
         this.observacao = observacao;
         this.usuario = usuario;
     }

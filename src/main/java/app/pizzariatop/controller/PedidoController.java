@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.util.List;
 
 @RestController
@@ -37,6 +38,16 @@ public class PedidoController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+    
+    @GetMapping("/status")
+    public ResponseEntity<List<PedidoDTO>> buscarPorStatus(){
+        try{
+            return ResponseEntity.ok(pedidoService.findByStatus());
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
 
     @GetMapping("/buscar/{id}")
     public ResponseEntity<PedidoDTO> buscarId(@RequestParam("id")Long id){
@@ -66,6 +77,16 @@ public class PedidoController {
         }catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+    
+ 
+    @PutMapping("/finalizar/{id}")
+    public ResponseEntity<PedidoDTO> finalizar(@PathVariable("id")Long id, @RequestBody PedidoDTO pedidoDTO){
+    	try {
+    		return ResponseEntity.ok(pedidoService.finalizar(id, pedidoDTO));
+    	}catch (Exception e) {
+    		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
     }
 
 }
