@@ -100,13 +100,13 @@ public class PedidoService {
 		return "Pedido deletado";
 	}
 
-	public PedidoDTO finalizar(Long id) {
-		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
-		
-		Assert.isTrue(pedido != null, "Pedido nao encontrado");
-
-		
-	}
+//	public PedidoDTO finalizar(Long id) {
+//		Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
+//
+//		Assert.isTrue(pedido != null, "Pedido nao encontrado");
+//
+//
+//	}
 
 	public PedidoDTO toPedidoDTO(Pedido pedido) {
 		PedidoDTO pedidoDTO = new PedidoDTO();
