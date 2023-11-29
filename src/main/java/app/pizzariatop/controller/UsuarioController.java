@@ -5,6 +5,7 @@ import app.pizzariatop.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,17 +19,30 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @PostMapping
+
+    @PostMapping("/cadastro")
     public ResponseEntity<UsuarioDTO> criar(@RequestBody UsuarioDTO usuarioDTO){
         try{
-            return ResponseEntity.ok( usuarioService.criar(usuarioDTO));
+            return ResponseEntity.ok(usuarioService.registrar(usuarioDTO));
         }catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
+
     @GetMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<UsuarioDTO>> buscarUsuarios(){
+        try{
+            return ResponseEntity.ok(usuarioService.findAllUsuarios());
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UsuarioDTO>> teste(){
         try{
             return ResponseEntity.ok(usuarioService.findAllUsuarios());
         }catch (Exception e){

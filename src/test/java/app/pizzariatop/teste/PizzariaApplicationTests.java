@@ -1,16 +1,9 @@
 package app.pizzariatop.teste;
 
-import app.pizzariatop.controller.*;
-import app.pizzariatop.dto.*;
-import app.pizzariatop.entity.*;
-import app.pizzariatop.repository.*;
-import app.pizzariatop.service.*;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,7 +22,6 @@ import app.pizzariatop.dto.SaboresDTO;
 import app.pizzariatop.dto.UsuarioDTO;
 import app.pizzariatop.entity.Endereco;
 import app.pizzariatop.entity.Item;
-import app.pizzariatop.entity.Login;
 import app.pizzariatop.entity.Pedido;
 import app.pizzariatop.entity.Sabores;
 import app.pizzariatop.entity.Usuario;

@@ -2,9 +2,13 @@ package app.pizzariatop.service;
 
 import app.pizzariatop.dto.LoginDTO;
 import app.pizzariatop.convert.UsuarioDTOConvert;
-import app.pizzariatop.entity.Login;
+import app.pizzariatop.dto.UsuarioDTO;
+import app.pizzariatop.entity.Usuario;
 import app.pizzariatop.repository.LoginRepository;
+import app.pizzariatop.security.JwtServiceGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -15,81 +19,38 @@ import java.util.List;
 public class LoginService {
 
     @Autowired
-    private LoginRepository loginRepository;
+    private LoginRepository repository;
+    @Autowired
+    private JwtServiceGenerator jwtService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private UsuarioDTOConvert usuarioDTOConvert;
 
-    public LoginDTO criar(LoginDTO loginDTO){
-
-        Login login = toLogin(loginDTO);
-
-        loginRepository.save(login);
-
-        return toLoginDTO(login);
+    public UsuarioDTO logar(LoginDTO loginDTO) {
+        System.out.println("a");
+        authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(
+            loginDTO.getUsername(),
+            loginDTO.getPassword()
+          )
+        );
+        System.out.println("b");
+        Usuario user = repository.findByUsername(loginDTO.getUsername()).orElseThrow();
+        System.out.println("c");
+        var jwtToken = jwtService.generateToken(user);
+        System.out.println("d");
+        return toUsuarioDTO(user,jwtToken);
     }
 
-    public List<LoginDTO> buscarTodos(){
-        List<Login> loginListBanco = loginRepository.findAll();
-        List<LoginDTO> loginDTOList = new ArrayList<>();
-
-        for(int i = 0; i< loginListBanco.size(); i++){
-            loginDTOList.add(toLoginDTO(loginListBanco.get(i)));
-        }
-
-        return loginDTOList;
-    }
-
-    public List<LoginDTO> findByNome(String nome){
-        List<Login> loginList = loginRepository.findUserNameByNomeDeLogin(nome);
-        List<LoginDTO> loginDTOList = new ArrayList<>();
-
-        for(int i = 0; i < loginList.size(); i++){
-            loginDTOList.add(toLoginDTO(loginList.get(i)));
-        }
-        return loginDTOList;
-    }
-
-    public LoginDTO editar(Long id, LoginDTO loginDTO){
-        Login loginBanco = this.loginRepository.findById(id).orElse(null);
-
-        Assert.isTrue(loginBanco != null, "Login nao encontrado");
-
-        loginRepository.save(toLogin(loginDTO));
-
-        return loginDTO;
-    }
-
-    public String deletar(Long id){
-        Login loginBanco = this.loginRepository.findById(id).orElse(null);
-
-        Assert.isTrue(loginBanco != null, "Login nao encontrado");
-
-        loginRepository.delete(loginBanco);
-
-        return "Login deletado com sucesso";
-    }
-
-    public Login toLogin(LoginDTO loginDTO){
-        Login login = new Login();
-
-        login.setId(loginDTO.getId());
-        login.setEmail(loginDTO.getEmail());
-        login.setSenha(loginDTO.getSenha());
-        login.setUsuario(usuarioDTOConvert.convertUsuarioDTOToUsuario(loginDTO.getUsuarioDTO()));
-
-        return login;
-    }
-
-    public LoginDTO toLoginDTO(Login login){
-        LoginDTO loginDTO = new LoginDTO();
-
-        loginDTO.setId(login.getId());
-        loginDTO.setEmail(login.getEmail());
-        loginDTO.setSenha(login.getSenha());
-        loginDTO.setUsuarioDTO(usuarioDTOConvert.convertUsuarioToUsuarioDTO(login.getUsuario()));
-
-        return loginDTO;
+    public UsuarioDTO toUsuarioDTO(Usuario usuario, String token){
+        UsuarioDTO usuarioDTO = new UsuarioDTO();
+        usuarioDTO.setId(usuario.getId());
+        usuarioDTO.setRole(usuario.getRole());
+        usuarioDTO.setToken(token);
+        usuarioDTO.setUsername(usuario.getUsername());
+        return usuarioDTO;
     }
 
 
