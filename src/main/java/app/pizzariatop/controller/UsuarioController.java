@@ -1,6 +1,7 @@
 package app.pizzariatop.controller;
 
 import app.pizzariatop.dto.UsuarioDTO;
+import app.pizzariatop.entity.Usuario;
 import app.pizzariatop.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,19 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @PostMapping("/criar-conta")
+    public ResponseEntity<?> criarConta(@RequestBody Usuario usuario){
+        try{
+            return ResponseEntity.ok(usuarioService.registrar(usuario));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/cadastro")
     public ResponseEntity<UsuarioDTO> criar(@RequestBody UsuarioDTO usuarioDTO){
         try{
-            return ResponseEntity.ok(usuarioService.registrar(usuarioDTO));
+            return ResponseEntity.ok(usuarioService.criar(usuarioDTO));
         }catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -31,18 +40,7 @@ public class UsuarioController {
 
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<UsuarioDTO>> buscarUsuarios(){
-        try{
-            return ResponseEntity.ok(usuarioService.findAllUsuarios());
-        }catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-    }
-
-    @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UsuarioDTO>> teste(){
         try{
             return ResponseEntity.ok(usuarioService.findAllUsuarios());
         }catch (Exception e){

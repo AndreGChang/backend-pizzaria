@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -27,6 +28,9 @@ public class UsuarioService {
     @Autowired
     private UsuarioDTOConvert usuarioDTOConvert;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     //implementar o metedo de login
 //    @Override
 //    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -38,34 +42,34 @@ public class UsuarioService {
 //        throw new UsernameNotFoundException("Nao encontrado");
 //    }
 
-    public UsuarioDTO registrar(UsuarioDTO usuarioDTO) throws Exception{
-        Usuario userEmailBanco = usuarioRepository.findByUsername(usuarioDTO.getUsername());
-        if(!userEmailBanco.getUsername().equals(usuarioDTO.getUsername())){
+    public UsuarioDTO registrar(Usuario usuarioDTO) throws Exception{
+      //  Usuario userEmailBanco = usuarioRepository.findByUsername(usuarioDTO.getUsername());
+       // if(!userEmailBanco.getUsername().equals(usuarioDTO.getUsername())){
             Usuario userNew = new Usuario();
             userNew.setId(usuarioDTO.getId());
             userNew.setNome(usuarioDTO.getNome());
             userNew.setCpf(usuarioDTO.getCpf());
             userNew.setTelefone(usuarioDTO.getTelefone());
             userNew.setUsername(usuarioDTO.getUsername());
-            userNew.setPassword(usuarioDTO.getUsername());
+            userNew.setPassword(passwordEncoder.encode(usuarioDTO.getUsername()));
             userNew.setRole(usuarioDTO.getRole());
 
             usuarioRepository.save(userNew);
 
             return usuarioDTOConvert.convertUsuarioToUsuarioDTO(userNew);
-        }else{
-            throw new Exception("Usuario ja existente");
-        }
+      //  }else{
+
+       // }
     }
 
-//    public UsuarioDTO criar(UsuarioDTO usuarioDTO){
-//
-//        Usuario usuariotemp = usuarioDTOConvert.convertUsuarioDTOToUsuario(usuarioDTO);
-//
-//        this.usuarioRepository.save(usuariotemp);
-//
-//       return usuarioDTOConvert.convertUsuarioToUsuarioDTO(usuariotemp);
-//    }
+    public UsuarioDTO criar(UsuarioDTO usuarioDTO){
+
+        Usuario usuariotemp = usuarioDTOConvert.convertUsuarioDTOToUsuario(usuarioDTO);
+
+        this.usuarioRepository.save(usuariotemp);
+
+       return usuarioDTOConvert.convertUsuarioToUsuarioDTO(usuariotemp);
+    }
 
     public List<UsuarioDTO> findByNome(String nome){
         List<Usuario> usuarioBanco = this.usuarioRepository.findPessoaByNome(nome);

@@ -34,9 +34,8 @@ public class LoginController {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
-
-
-    @GetMapping("deslogar")
+    
+    @GetMapping("/deslogar")
     public ResponseEntity<HttpStatus> logout() {
 
         SecurityContextHolder.clearContext();
